@@ -1,0 +1,18 @@
+[package]
+name = "wherenver"
+version = "0.0.1"
+authors = ["Xarvex"]
+edition = "2021"
+rust-version = "1.74.1" # cargo-msrv on 2024-09-14
+description = "Enter direnv contexts from other directories"
+repository = "https://gitlab.com/xarvex/wherenver"
+
+[dependencies]
+anyhow = "1.0.88"
+clap = { version = "4.5.17", features = ["derive"] }
+strum = { version = "0.26.3", features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+strip = true
+lto = true
