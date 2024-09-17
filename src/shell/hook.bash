@@ -13,13 +13,17 @@ EOF
 wherenver() {
     case "${1}" in
     at)
-        eval "$("@WHERENVER_REPLACE_BIN@" --shell bash export "${2}")"
+        eval "$("@WHERENVER_REPLACE_BIN@" --shell bash at "${2}")"
         ;;
     exit)
         eval "$("@WHERENVER_REPLACE_BIN@" --shell bash exit)"
         ;;
     *)
-        "@WHERENVER_REPLACE_BIN@" --shell bash "${@}"
+        if [ -n "${*}" ]; then
+            "@WHERENVER_REPLACE_BIN@" --shell bash "${@}"
+        else
+            "@WHERENVER_REPLACE_BIN@"
+        fi
         ;;
     esac
 }

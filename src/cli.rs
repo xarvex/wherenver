@@ -9,13 +9,13 @@ use crate::shell::Shell;
 pub struct Cli {
     #[command(subcommand)]
     pub command: Command,
-    #[arg(long)]
-    pub shell: Shell,
+    #[arg(long, hide = true)]
+    pub shell: Option<Shell>,
 }
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
-    Hook,
-    Export { path: PathBuf },
+    Hook { shell: Shell },
+    At { path: PathBuf },
     Exit,
 }

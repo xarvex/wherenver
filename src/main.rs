@@ -1,33 +1,57 @@
 use std::{
     io::{self, Write},
     os::unix::process::CommandExt,
-    process,
+    process::{self, ExitCode},
 };
 
 use anyhow::Result;
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use cli::{Cli, Command};
 
 mod cli;
 mod shell;
 
-fn main() -> Result<()> {
+fn main() -> Result<ExitCode> {
     let cli = Cli::parse();
 
-    match cli.command {
-        Command::Hook => println!("{}", cli.shell.hook()),
-        Command::Export { ref path } => {
-            print!("{}", cli.shell.export());
-            io::stdout().flush()?;
+    let shell = cli.shell.ok_or_else(|| {
+        Cli::command().error(
+            clap::error::ErrorKind::MissingRequiredArgument,
+            "
+Subcommand was called without shell argument.
+This should have been provided by the shell hook function. Is it active?
+",
+        )
+    });
 
-            return Err(process::Command::new("direnv")
-                .args(["export", &cli.shell.to_string()])
-                .current_dir(path)
-                .exec()
-                .into());
-        }
-        Command::Exit => println!("{}", cli.shell.exit()),
+    match cli.command {
+        Command::Hook { shell } => println!("{}", shell.hook()),
+        Command::At { path } => match shell {
+            Ok(shell) => {
+                print!("{}", shell.export());
+                io::stdout().flush()?;
+
+                return Err(process::Command::new("direnv")
+                    .args(["export", &shell.to_string()])
+                    .current_dir(path)
+                    .exec()
+                    .into());
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+
+                return Ok(ExitCode::FAILURE);
+            }
+        },
+        Command::Exit => match shell {
+            Ok(shell) => println!("{}", shell.exit()),
+            Err(e) => {
+                eprintln!("{}", e);
+
+                return Ok(ExitCode::FAILURE);
+            }
+        },
     }
 
-    Ok(())
+    Ok(ExitCode::default())
 }

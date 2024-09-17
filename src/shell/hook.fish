@@ -13,10 +13,14 @@ end
 function wherenver
     switch $argv[1]
         case at
-            "@WHERENVER_REPLACE_BIN@" --shell fish export $argv[2] | source
+            "@WHERENVER_REPLACE_BIN@" --shell fish at $argv[2] | source
         case exit
             "@WHERENVER_REPLACE_BIN@" --shell fish exit | source
         case '*'
-            "@WHERENVER_REPLACE_BIN@" --shell fish $argv
+            if test -n "$argv"
+                "@WHERENVER_REPLACE_BIN@" --shell fish $argv
+            else
+                "@WHERENVER_REPLACE_BIN@"
+            end
     end
 end
