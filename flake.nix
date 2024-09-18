@@ -51,9 +51,9 @@
         in
         {
           packages = rec {
-            default = name;
+            default = wherenver;
 
-            name = pkgs.rustPlatform.buildRustPackage rec {
+            wherenver = pkgs.rustPlatform.buildRustPackage rec {
               inherit (manifest) version;
 
               pname = manifest.name;
