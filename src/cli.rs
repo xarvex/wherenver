@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{ffi::OsString, path::PathBuf};
 
 use clap::{Parser, Subcommand};
 
@@ -15,7 +15,13 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
-    Hook { shell: Shell },
-    At { path: PathBuf },
+    #[command(external_subcommand)]
+    TestEval(Vec<OsString>),
+    Hook {
+        shell: Shell,
+    },
+    At {
+        path: PathBuf,
+    },
     Exit,
 }

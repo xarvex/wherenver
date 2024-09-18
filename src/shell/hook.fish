@@ -11,16 +11,11 @@ function __wherenver_export_eval --on-event fish_prompt
 end
 
 function wherenver
-    switch $argv[1]
-        case at
-            "@WHERENVER_REPLACE_BIN@" --shell fish at $argv[2] | source
-        case exit
-            "@WHERENVER_REPLACE_BIN@" --shell fish exit | source
-        case '*'
-            if test -n "$argv"
-                "@WHERENVER_REPLACE_BIN@" --shell fish $argv
-            else
-                "@WHERENVER_REPLACE_BIN@"
-            end
+    if test -z "$argv"
+        "@WHERENVER_REPLACE_BIN@"
+    else if "@WHERENVER_REPLACE_BIN@" test-eval $argv
+        "@WHERENVER_REPLACE_BIN@" --shell fish $argv | source
+    else
+        "@WHERENVER_REPLACE_BIN@" --shell fish $argv
     end
 end

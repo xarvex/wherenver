@@ -11,19 +11,11 @@ EOF
 )"
 
 wherenver() {
-    case "${1}" in
-    at)
-        eval "$("@WHERENVER_REPLACE_BIN@" --shell bash at "${2}")"
-        ;;
-    exit)
-        eval "$("@WHERENVER_REPLACE_BIN@" --shell bash exit)"
-        ;;
-    *)
-        if [ -n "${*}" ]; then
-            "@WHERENVER_REPLACE_BIN@" --shell bash "${@}"
-        else
-            "@WHERENVER_REPLACE_BIN@"
-        fi
-        ;;
-    esac
+    if [ -z "${*}" ]; then
+        "@WHERENVER_REPLACE_BIN@"
+    elif "@WHERENVER_REPLACE_BIN@" test-eval "${@}"; then
+        eval "$("@WHERENVER_REPLACE_BIN@" --shell bash "${@}")"
+    else
+        "@WHERENVER_REPLACE_BIN@" --shell bash "${@}"
+    fi
 }

@@ -25,6 +25,15 @@ This should have been provided by the shell hook function. Is it active?
     });
 
     match cli.command {
+        Command::TestEval(raw) => {
+            return Ok(match Cli::try_parse_from(raw) {
+                Ok(args) => match args.command {
+                    Command::At { .. } | Command::Exit => ExitCode::SUCCESS,
+                    _ => ExitCode::FAILURE,
+                },
+                Err(_) => ExitCode::FAILURE,
+            });
+        }
         Command::Hook { shell } => println!("{}", shell.hook()),
         Command::At { path } => match shell {
             Ok(shell) => {
