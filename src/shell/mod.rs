@@ -12,13 +12,13 @@ pub enum Shell {
 
 impl Shell {
     pub fn hook(&self) -> String {
-        let ref bin = env::args().nth(0).unwrap_or("wherenver".to_string());
+        let bin = env::args().nth(0).unwrap_or("wherenver".to_string());
 
         match self {
             Shell::Bash => include_str!("hook.bash"),
             Shell::Fish => include_str!("hook.fish"),
         }
-        .replace("@WHERENVER_REPLACE_BIN@", bin)
+        .replace("@WHERENVER_REPLACE_BIN@", &bin)
     }
     pub fn export(&self) -> &str {
         match self {
