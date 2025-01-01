@@ -21,6 +21,8 @@
     cargo-msrv
     cargo-udeps
 
+    codespell
+
     direnv
   ];
 
