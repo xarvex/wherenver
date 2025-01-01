@@ -41,71 +41,17 @@
 
       perSystem =
         { pkgs, ... }:
-        let
-          manifest = (pkgs.lib.importTOML ./Cargo.toml).package;
-        in
         {
           packages = rec {
             default = wherenver;
 
-            wherenver = pkgs.rustPlatform.buildRustPackage rec {
-              inherit (manifest) version;
-
-              pname = manifest.name;
-
-              src = pkgs.lib.cleanSource ./.;
-              cargoLock.lockFile = ./Cargo.lock;
-
-              meta = {
-                inherit (manifest) description;
-
-                homepage = manifest.repository;
-                license = lib.licenses.mit;
-                maintainers = with lib.maintainers; [ xarvex ];
-                mainProgram = pname;
-                platforms = lib.platforms.linux;
-              };
-            };
+            wherenver = pkgs.callPackage ./nix/package.nix { };
           };
 
           devenv.shells = rec {
-            default = rust;
+            default = wherenver;
 
-            rust = {
-              devenv.root =
-                let
-                  devenvRoot = builtins.readFile inputs.devenv-root.outPath;
-                in
-                # If not overridden (/dev/null), --impure is necessary.
-                lib.mkIf (devenvRoot != "") devenvRoot;
-
-              name = "wherenver";
-
-              packages = with pkgs; [
-                cargo-deny
-                cargo-edit
-                cargo-expand
-                cargo-msrv
-                cargo-udeps
-
-                direnv
-              ];
-
-              languages = {
-                nix.enable = true;
-                rust.enable = true;
-                shell.enable = true;
-              };
-
-              pre-commit.hooks = {
-                clippy.enable = true;
-                deadnix.enable = true;
-                flake-checker.enable = true;
-                nixfmt-rfc-style.enable = true;
-                rustfmt.enable = true;
-                statix.enable = true;
-              };
-            };
+            wherenver = import ./nix/devenv.nix { inherit inputs lib pkgs; };
           };
 
           formatter = pkgs.nixfmt-rfc-style;
@@ -114,44 +60,7 @@
       flake.homeManagerModules = rec {
         default = wherenver;
 
-        wherenver =
-          {
-            config,
-            lib,
-            pkgs,
-            ...
-          }:
-          let
-            cfg' = config.programs.direnv;
-            cfg = cfg'.wherenver;
-          in
-          {
-            options.programs.direnv.wherenver = {
-              enable = lib.mkEnableOption "wherenver";
-              enableBashIntegration = lib.mkEnableOption "Bash integration" // {
-                default = true;
-              };
-              enableFishIntegration = lib.mkEnableOption "Fish integration" // {
-                default = true;
-              };
-              package = lib.mkPackageOption self.packages.${pkgs.system} "wherenver" { };
-            };
-
-            config = lib.mkIf (cfg'.enable && cfg.enable) {
-              programs = {
-                bash.initExtra = lib.mkIf cfg.enableBashIntegration (
-                  lib.mkOrder 1600 ''
-                    eval "$(${lib.getExe cfg.package} hook bash)"
-                  ''
-                );
-                fish.interactiveShellInit = lib.mkIf cfg.enableFishIntegration (
-                  lib.mkOrder 1600 ''
-                    ${lib.getExe cfg.package} hook fish | source
-                  ''
-                );
-              };
-            };
-          };
+        wherenver = import ./nix/home-manager.nix { inherit self; };
       };
     };
 }
