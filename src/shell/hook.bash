@@ -19,3 +19,5 @@ wherenver() {
         "@WHERENVER_REPLACE_BIN@" --shell bash "${@}"
     fi
 }
+
+# vi: ft=bash

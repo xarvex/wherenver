@@ -11,7 +11,7 @@ function __wherenver_export_eval --on-event fish_prompt
 end
 
 function wherenver
-    if test -z "$argv"
+    if test -z $argv
         "@WHERENVER_REPLACE_BIN@"
     else if "@WHERENVER_REPLACE_BIN@" test-eval $argv
         "@WHERENVER_REPLACE_BIN@" --shell fish $argv | source
