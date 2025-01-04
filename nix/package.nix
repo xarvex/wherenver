@@ -12,7 +12,7 @@ rustPlatform.buildRustPackage rec {
 
   pname = manifest.name;
 
-  src = pkgs.lib.cleanSource ../.;
+  src = ../.;
   cargoLock.lockFile = ../Cargo.lock;
 
   meta = {

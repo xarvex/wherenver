@@ -44,13 +44,11 @@
         {
           packages = rec {
             default = wherenver;
-
             wherenver = pkgs.callPackage ./nix/package.nix { };
           };
 
           devenv.shells = rec {
             default = wherenver;
-
             wherenver = import ./nix/devenv.nix { inherit inputs lib pkgs; };
           };
 
@@ -59,7 +57,6 @@
 
       flake.homeManagerModules = rec {
         default = wherenver;
-
         wherenver = import ./nix/home-manager.nix { inherit self; };
       };
     };
