@@ -1,21 +1,14 @@
 {
-  description = "wherenver";
+  description = "dotpanel";
 
   inputs = {
-    devenv.url = "github:cachix/devenv";
-
-    devenv-root = {
-      url = "file+file:///dev/null";
-      flake = false;
-    };
-
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
-    nix2container = {
-      url = "github:nlewo/nix2container";
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -35,21 +28,38 @@
       inherit (nixpkgs) lib;
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [ inputs.devenv.flakeModule ];
-
       systems = import inputs.systems;
 
       perSystem =
-        { pkgs, ... }:
+        { pkgs, system, ... }:
         {
           packages = rec {
             default = wherenver;
             wherenver = pkgs.callPackage ./nix/package.nix { };
           };
 
-          devenv.shells = rec {
+          devShells = rec {
             default = wherenver;
-            wherenver = import ./nix/devenv.nix { inherit inputs lib pkgs; };
+            wherenver = import ./nix/shell.nix {
+              inherit
+                inputs
+                lib
+                pkgs
+                self
+                ;
+            };
+          };
+
+          checks.pre-commit = inputs.git-hooks.lib.${system}.run {
+            src = ./.;
+            hooks = {
+              clippy.enable = true;
+              deadnix.enable = true;
+              flake-checker.enable = true;
+              nixfmt-rfc-style.enable = true;
+              rustfmt.enable = true;
+              statix.enable = true;
+            };
           };
 
           formatter = pkgs.nixfmt-rfc-style;
@@ -57,7 +67,7 @@
 
       flake.homeManagerModules = rec {
         default = wherenver;
-        wherenver = import ./nix/home-manager.nix { inherit self; };
+        wherenver = import ./nix/home-manager.nix { inherit inputs self; };
       };
     };
 }
