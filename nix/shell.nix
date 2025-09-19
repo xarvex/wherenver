@@ -1,26 +1,30 @@
-{ pkgs, self, ... }:
+{ pkgs, ... }:
 
-let
-  inherit (self.checks.${pkgs.system}) pre-commit;
-in
 pkgs.mkShell {
-  nativeBuildInputs =
-    pre-commit.enabledPackages
-    ++ (with pkgs; [
-      cargo
-      rustc
+  nativeBuildInputs = with pkgs; [
+    cargo
+    rustc
 
-      clippy
-      rust-analyzer
+    clippy
+    rust-analyzer
+    rustfmt
 
-      cargo-deny
-      cargo-edit
-      cargo-expand
-      cargo-msrv
-      cargo-udeps
+    cargo-deny
+    cargo-edit
+    cargo-expand
+    cargo-msrv
+    cargo-sort
+    cargo-udeps
 
-      shellcheck
-    ]);
+    shellcheck
+
+    deadnix
+    flake-checker
+    nixfmt-rfc-style
+    statix
+
+    pre-commit
+  ];
   buildInputs = with pkgs; [
     direnv
 
@@ -34,5 +38,7 @@ pkgs.mkShell {
     RUST_SRC_PATH = pkgs.rustPlatform.rustLibSrc;
   };
 
-  inherit (pre-commit) shellHook;
+  shellHook = ''
+    pre-commit install
+  '';
 }
